@@ -1,35 +1,57 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+
 import './App.css'
+import EngineerPage from "./pages/EngineerPage";
+import ManagerPage from "./pages/ManagerPage";
+
+import { useState } from "react";
+import type { Engineer, Task, CompletedTask } from "./types/interfaces";
+
+const initialEngineers: Engineer[] = [
+  { name: "Olivia Perez" },
+  { name: "Professor/TA" },
+];
+const initialTasks: Task[] = [
+  { name: "Task 1", description: "Design manager view mockup", estimatedTime: 60, assignedEngineer: "Olivia Perez" },
+  { name: "Task 2", description: "Design engineer view mockup", estimatedTime: 30, assignedEngineer: "Olivia Perez" },
+  { name: "Task 3", description: "Grade hw", estimatedTime: 45, assignedEngineer: "Professor/TA" },
+  { name: "Task 4", description: "misc task", estimatedTime: 180 },
+];
+const initialCompletedTasks: CompletedTask[] = [
+  { name: "Task 0", engineer: "Olivia Perez", estimatedTime: 60, actualTime: 45 },
+];
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [engineers, setEngineers] = useState<Engineer[]>(initialEngineers);
+  const [tasks, setTasks] = useState<Task[]>(initialTasks);
+  const [completedTasks, setCompletedTasks] = useState<CompletedTask[]>(initialCompletedTasks);
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <Router>
+      <Routes>
+        <Route path="/" element={<Navigate to="/manager" />} />
+        <Route path="/engineer" element={<EngineerPage
+          tasks={tasks}
+          setTasks={setTasks}
+          completedTasks={completedTasks}
+          setCompletedTasks={setCompletedTasks}
+        />} />
+        <Route path="/manager" element={<ManagerPage
+          engineers={engineers}
+          setEngineers={setEngineers}
+          tasks={tasks}
+          setTasks={setTasks}
+          completedTasks={completedTasks}
+          setCompletedTasks={setCompletedTasks}
+        />} />
+      </Routes>
+    </Router>
+  );
 }
 
 export default App
