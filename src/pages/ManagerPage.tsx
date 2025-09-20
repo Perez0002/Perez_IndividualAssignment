@@ -4,11 +4,11 @@ import type { Engineer, Task, CompletedTask } from "../types/interfaces";
 
   interface ManagerPageProps {
     engineers: Engineer[];
-    setEngineers: React.SetStateAction<Engineer[]>;
+    setEngineers: React.Dispatch<React.SetStateAction<Engineer[]>>;
     tasks: Task[];
-    setTasks: React.SetStateAction<Task[]>;
+    setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
     completedTasks: CompletedTask[];
-    setCompletedTasks: React.SetStateAction<CompletedTask[]>;
+    setCompletedTasks: React.Dispatch<React.SetStateAction<CompletedTask[]>>;
   }
 
   function ManagerPage({ engineers, setEngineers, tasks, setTasks, completedTasks, setCompletedTasks }: ManagerPageProps) {
@@ -19,24 +19,46 @@ import type { Engineer, Task, CompletedTask } from "../types/interfaces";
     const navigate = useNavigate();
 
     // Engineer use cases
-    const handleAddEngineer = () => {};
-    const handleRemoveEngineer = () => {};
+  const handleAddEngineer = (e: React.FormEvent) => {
+    e.preventDefault();
+    setEngineers([...engineers, { name: newEngineer.trim() }]);
+  };
+    const handleRemoveEngineer = (name: string) => {
+      setEngineers(engineers.filter(e => e.name !== name));
+    };
 
     // Task use cases
-    const handleAddTask = () => {};
-    const handleRemoveTask = () => {};
+    const handleAddTask = (e: React.FormEvent) => {
+      e.preventDefault();
+      if (newTask.name && newTask.description && newTask.estimatedTime > 0) {
+        setTasks([...tasks, { ...newTask }]);
+        setNewTask({ name: "", description: "", estimatedTime: 0 });
+      }
+    };
+    const handleRemoveTask = (name: string) => {
+      setTasks(tasks.filter(t => t.name !== name));
+    };
 
-    // Assign use case
-    const handleAssignTask = () => {};
+    // Assign task use case
+    const handleAssignTask = (e: React.FormEvent) => {
+      e.preventDefault();
+      setTasks(tasks.map(t =>
+        t.name === assignTaskName && !t.assignedEngineer && assignEngineerName
+          ? { ...t, assignedEngineer: assignEngineerName }
+          : t
+      ));
+      setAssignTaskName("");
+      setAssignEngineerName("");
+    };
 
     return (
       <div>
-        <button onClick={() => navigate("/engineer")}>To Engineer View</button>
+        <button onClick={() => navigate("/engineer")}>Switch to Engineer View</button>
         <h1>Manager Dashboard</h1>
         
-        {/* Engineer use cases */}
+        {/* Engineers use cases */}
         <h2>Engineers</h2>
-        <form onSubmit={e => { e.preventDefault(); handleAddEngineer(); }}>
+  <form onSubmit={handleAddEngineer}>
           <label>Add Engineer:</label>
           <input
             type="text"
@@ -67,25 +89,25 @@ import type { Engineer, Task, CompletedTask } from "../types/interfaces";
 
         {/* Tasks use cases */}
         <h2>Tasks</h2>
-        <form onSubmit={e => {handleAddTask(); }}>
+  <form onSubmit={handleAddTask}>
           <label>Add Task:</label>
           <input
             type="text"
             placeholder="Task Name"
             value={newTask.name}
-            onChange={e => setNewTask()}
+            onChange={e => setNewTask({ ...newTask, name: e.target.value })}
           />
           <input
             type="text"
             placeholder="Task Description"
             value={newTask.description}
-            onChange={e => setNewTask()}
+            onChange={e => setNewTask({ ...newTask, description: e.target.value })}
           />
           <input
             type="number"
             placeholder="Estimated Time (minutes)"
             value={newTask.estimatedTime || ""}
-            onChange={e => setNewTask()}
+            onChange={e => setNewTask({ ...newTask, estimatedTime: Number(e.target.value) })}
           />
           <button type="submit">Add</button>
         </form>
@@ -107,7 +129,7 @@ import type { Engineer, Task, CompletedTask } from "../types/interfaces";
                 <td>{t.estimatedTime}</td>
                 <td>{t.assignedEngineer || ""}</td>
                 <td>
-                  <button type="button" onClick={() => handleRemoveTask()}>Remove</button>
+                  <button type="button" onClick={() => handleRemoveTask(t.name)}>Remove</button>
                 </td>
               </tr>
             ))}
@@ -115,19 +137,25 @@ import type { Engineer, Task, CompletedTask } from "../types/interfaces";
         </table>
 
         {/* Assign task use case */}
-        <form onSubmit={e => {handleAssignTask(); }}>
+  <form onSubmit={handleAssignTask}>
           <label>Assign Task:</label>
           <select value={assignTaskName} onChange={e => setAssignTaskName(e.target.value)}>
             <option value="">--task list--</option>
+            {tasks.filter(t => !t.assignedEngineer).map(t => (
+              <option key={t.name} value={t.name}>{t.name}</option>
+            ))}
           </select>
           <label> to </label>
           <select value={assignEngineerName} onChange={e => setAssignEngineerName(e.target.value)}>
             <option value="">--engineer list--</option>
+            {engineers.map(e => (
+              <option key={e.name} value={e.name}>{e.name}</option>
+            ))}
           </select>
           <button type="submit">Assign</button>
         </form>
 
-        {/* Completed tasks */}
+        {/* Completed Tasks Section */}
         <h2>Completed Tasks</h2>
         <table border={1} cellSpacing={0} cellPadding={5}>
           <thead>

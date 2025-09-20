@@ -4,9 +4,9 @@ import type { Task, CompletedTask } from "../types/interfaces";
 
 interface EngineerPageProps {
 	tasks: Task[];
-	setTasks: React.SetStateAction<Task[]>;
+	setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
 	completedTasks: CompletedTask[];
-	setCompletedTasks: React.SetStateAction<CompletedTask[]>;
+	setCompletedTasks: React.Dispatch<React.SetStateAction<CompletedTask[]>>;
 }
 
 function EngineerPage({ tasks, setTasks, completedTasks, setCompletedTasks }: EngineerPageProps) {
@@ -15,9 +15,21 @@ function EngineerPage({ tasks, setTasks, completedTasks, setCompletedTasks }: En
 
 	const assignedTasks = tasks.filter(t => t.assignedEngineer);
 
-	const handleActualTimeChange = () => {};
+	const handleActualTimeChange = (taskName: string, value: string) => {
+		setActualTimes({ ...actualTimes, [taskName]: Number(value) });
+	};
 
-	const handleCompleteTask = ()=> {};
+	const handleCompleteTask = (task: Task) => {
+		const actualTime = actualTimes[task.name];
+		if (actualTime && actualTime > 0) {
+			setTasks(tasks.filter(t => t.name !== task.name));
+			setCompletedTasks([
+				...completedTasks,
+				{ ...task, actualTime },
+			]);
+			setActualTimes({ ...actualTimes, [task.name]: 0 });
+		}
+	};
 
 	return (
 		<div>
@@ -46,7 +58,7 @@ function EngineerPage({ tasks, setTasks, completedTasks, setCompletedTasks }: En
 									type="number"
 									placeholder="Enter minutes"
 									value={actualTimes[task.name] || ""}
-									onChange={e => handleActualTimeChange()}
+									onChange={e => handleActualTimeChange(task.name, e.target.value)}
 									min={1}
 								/>
 							</td>
@@ -74,8 +86,8 @@ function EngineerPage({ tasks, setTasks, completedTasks, setCompletedTasks }: En
 					</tr>
 				</thead>
 				<tbody>
-					{completedTasks.map((task, index) => (
-						<tr key={index}>
+					{completedTasks.map((task, idx) => (
+						<tr key={idx}>
 							<td>{task.name}</td>
 							<td>{task.estimatedTime}</td>
 							<td>{task.actualTime}</td>
