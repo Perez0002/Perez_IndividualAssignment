@@ -36,6 +36,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Navigate to="/manager" />} />
         <Route path="/engineer" element={<EngineerPage
+          engineers={engineers}
           tasks={tasks}
           setTasks={setTasks}
           completedTasks={completedTasks}
