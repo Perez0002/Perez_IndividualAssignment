@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { Engineer, Task, CompletedTask } from "../types/interfaces";
+import TaskSummaryTable from "../components/TaskSummaryTable";
 
 interface ManagerPageProps {
   engineers: Engineer[];
@@ -54,7 +55,10 @@ function ManagerPage({
     setNewTask({ name: "", description: "", estimatedTime: 0 });
   };
   const handleRemoveTask = (name: string) => {
-    setTasks(tasks.filter((t) => t.name !== name));
+    const task = tasks.find((t) => t.name === name);
+    if (task && !task.assignedEngineer) {
+      setTasks(tasks.filter((t) => t.name !== name));
+    }
   };
 
   // Assign task use case
@@ -226,6 +230,16 @@ function ManagerPage({
           ))}
         </tbody>
       </table>
+
+      {/* Task minute summary */}
+      <TaskSummaryTable
+        completedTasks={completedTasks}
+        uncompletedTasks={tasks.filter(
+          (t) =>
+            !t.assignedEngineer ||
+            !completedTasks.some((ct) => ct.name === t.name)
+        )}
+      />
     </div>
   );
 }

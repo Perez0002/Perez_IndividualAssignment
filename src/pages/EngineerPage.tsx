@@ -1,4 +1,5 @@
 import { useState } from "react";
+import TaskSummaryTable from "../components/TaskSummaryTable";
 import { useNavigate } from "react-router-dom";
 import type { Task, CompletedTask } from "../types/interfaces";
 
@@ -20,10 +21,14 @@ function EngineerPage({
   setCompletedTasks,
 }: EngineerPageProps) {
   const [actualTimes, setActualTimes] = useState<{ [key: string]: number }>({});
-  const [selectedEngineer, setSelectedEngineer] = useState<string>(engineers.length > 0 ? engineers[0].name : "");
+  const [selectedEngineer, setSelectedEngineer] = useState<string>(
+    engineers.length > 0 ? engineers[0].name : ""
+  );
   const navigate = useNavigate();
 
-  const assignedTasks = tasks.filter((t) => t.assignedEngineer === selectedEngineer);
+  const assignedTasks = tasks.filter(
+    (t) => t.assignedEngineer === selectedEngineer
+  );
 
   const handleActualTimeChange = (taskName: string, value: string) => {
     setActualTimes({ ...actualTimes, [taskName]: Number(value) });
@@ -48,13 +53,20 @@ function EngineerPage({
 
   return (
     <div>
-      <button onClick={() => navigate("/manager")}>Switch to Manager View</button>
+      <button onClick={() => navigate("/manager")}>
+        Switch to Manager View
+      </button>
       <h1>Engineer Dashboard</h1>
 
       <label>Select Engineer: </label>
-      <select value={selectedEngineer} onChange={e => setSelectedEngineer(e.target.value)}>
-        {engineers.map(e => (
-          <option key={e.name} value={e.name}>{e.name}</option>
+      <select
+        value={selectedEngineer}
+        onChange={(e) => setSelectedEngineer(e.target.value)}
+      >
+        {engineers.map((e) => (
+          <option key={e.name} value={e.name}>
+            {e.name}
+          </option>
         ))}
       </select>
 
@@ -121,6 +133,16 @@ function EngineerPage({
           ))}
         </tbody>
       </table>
+
+      {/* Task summary table */}
+      <TaskSummaryTable
+        completedTasks={completedTasks}
+        uncompletedTasks={tasks.filter(
+          (t) =>
+            t.assignedEngineer === selectedEngineer &&
+            !completedTasks.some((ct) => ct.name === t.name)
+        )}
+      />
     </div>
   );
 }
